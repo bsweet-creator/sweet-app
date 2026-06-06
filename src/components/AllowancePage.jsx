@@ -89,8 +89,18 @@ function SettingsModal({ settings, onSave, onClose, onSignOut }) {
     if (!isNaN(d) && d > 0) setMonthly((d * days).toFixed(2))
   }
 
-  const save = () => {
-    onSave(parseFloat(monthly) || 0, parseFloat(daily) || 0)
+  const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const save = async () => {
+    setError('')
+    setSaving(true)
+    const res = await onSave(parseFloat(monthly) || 0, parseFloat(daily) || 0)
+    setSaving(false)
+    if (res?.error) {
+      setError(res.error.message)
+      return
+    }
     onClose()
   }
 
@@ -140,11 +150,13 @@ function SettingsModal({ settings, onSave, onClose, onSignOut }) {
           </div>
         </div>
 
+        {error && <p className="text-rose-500 text-sm text-center mb-3">{error}</p>}
         <button
           onClick={save}
-          className="w-full bg-indigo-600 text-white rounded-2xl py-4 font-bold text-lg mb-3 active:scale-95 transition-transform"
+          disabled={saving}
+          className="w-full bg-indigo-600 text-white rounded-2xl py-4 font-bold text-lg mb-3 disabled:opacity-50 active:scale-95 transition-transform"
         >
-          Save
+          {saving ? 'Saving…' : 'Save'}
         </button>
         <button
           onClick={onSignOut}

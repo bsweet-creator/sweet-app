@@ -95,13 +95,16 @@ export function useAllowance() {
 
   const saveSettings = async (monthly, daily) => {
     const todayStr = toLocalDate(new Date())
-    const { data: s } = await supabase
+    const { data: s, error } = await supabase
       .from('user_settings')
-      .update({ monthly_budget: monthly, daily_addition: daily, snapshot_date: todayStr })
-      .eq('user_id', user.id)
+      .upsert(
+        { user_id: user.id, monthly_budget: monthly, daily_addition: daily, snapshot_date: todayStr },
+        { onConflict: 'user_id' }
+      )
       .select()
       .single()
     if (s) setSettings(s)
+    return { error }
   }
 
   return {

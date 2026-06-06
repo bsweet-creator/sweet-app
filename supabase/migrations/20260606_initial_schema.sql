@@ -39,3 +39,12 @@ alter table transactions    enable row level security;
 create policy "own_settings"     on user_settings  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own_tasks"        on tasks           for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own_transactions" on transactions    for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Table-level grants. RLS (above) restricts WHICH rows; these grants allow
+-- the roles to touch the tables at all. Without them every query is denied.
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete
+  on table public.user_settings, public.tasks, public.transactions
+  to anon, authenticated;
+alter default privileges in schema public
+  grant select, insert, update, delete on tables to anon, authenticated;
