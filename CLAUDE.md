@@ -6,6 +6,7 @@ React + Vite web app hosted on Cloudflare Pages, backed by Supabase.
 - **Frontend**: React + Vite (`src/`)
 - **Database/Auth**: Supabase — client at `src/lib/supabase.js`
 - **Hosting**: Cloudflare Pages — auto-deploys on push to `main`
+- **Production URL**: https://sweet.sweetbuilds.com
 - **Repo**: https://github.com/bsweet-creator/sweet-app
 
 ## Development
