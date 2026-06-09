@@ -53,6 +53,16 @@ export function useTasks() {
     setTasks(p => p.filter(t => t.id !== id && t.parent_id !== id))
   }
 
+  const rename = async (id, title) => {
+    const { data } = await supabase
+      .from('tasks')
+      .update({ title, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single()
+    if (data) setTasks(p => p.map(t => (t.id === id ? data : t)))
+  }
+
   return {
     tasks,
     loading,
@@ -60,6 +70,7 @@ export function useTasks() {
     complete,
     setActive,
     archive,
+    rename,
     activeTask: tasks.find(t => t.is_active && t.status === 'todo') ?? null,
     rootTasks: tasks.filter(t => !t.parent_id && t.status === 'todo'),
     subtasksOf: (id) => tasks.filter(t => t.parent_id === id),

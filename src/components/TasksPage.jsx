@@ -1,6 +1,53 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useTasks } from '../hooks/useTasks'
 import { Target, Plus, Check, ChevronDown, ChevronRight, ArrowLeft, X, Trash2 } from 'lucide-react'
+
+// Tap the title to edit it in place. Enter (or blur) saves, Escape cancels.
+function EditableTitle({ value, onSave, className, inputClassName }) {
+  const [editing, setEditing] = useState(false)
+  const [text, setText] = useState(value)
+  const cancelRef = useRef(false)
+
+  const start = () => {
+    setText(value)
+    cancelRef.current = false
+    setEditing(true)
+  }
+
+  const finish = () => {
+    setEditing(false)
+    if (cancelRef.current) {
+      cancelRef.current = false
+      setText(value)
+      return
+    }
+    const trimmed = text.trim()
+    if (trimmed && trimmed !== value) onSave(trimmed)
+    else setText(value)
+  }
+
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        value={text}
+        onChange={e => setText(e.target.value)}
+        onBlur={finish}
+        onKeyDown={e => {
+          if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur() }
+          else if (e.key === 'Escape') { e.preventDefault(); cancelRef.current = true; e.currentTarget.blur() }
+        }}
+        className={inputClassName}
+      />
+    )
+  }
+
+  return (
+    <button type="button" onClick={start} className={className} title="Tap to edit">
+      {value}
+    </button>
+  )
+}
 
 function QuickCapture({ onAdd }) {
   const [text, setText] = useState('')
@@ -30,7 +77,7 @@ function QuickCapture({ onAdd }) {
   )
 }
 
-function TaskItem({ task, subtasks, onComplete, onSetActive, onArchive, onAdd }) {
+function TaskItem({ task, subtasks, onComplete, onSetActive, onArchive, onAdd, onRename }) {
   const [expanded, setExpanded] = useState(false)
   const [addingStep, setAddingStep] = useState(false)
   const [stepText, setStepText] = useState('')
@@ -53,7 +100,12 @@ function TaskItem({ task, subtasks, onComplete, onSetActive, onArchive, onAdd })
           onClick={() => onComplete(task.id)}
           className="shrink-0 w-5 h-5 rounded-full border-2 border-gray-300 hover:border-emerald-500 transition-colors"
         />
-        <span className="flex-1 text-gray-900 font-medium leading-snug">{task.title}</span>
+        <EditableTitle
+          value={task.title}
+          onSave={(t) => onRename(task.id, t)}
+          className="flex-1 text-left text-gray-900 font-medium leading-snug"
+          inputClassName="flex-1 text-gray-900 font-medium leading-snug border border-indigo-300 rounded-lg px-2 py-1 -my-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
         <div className="flex items-center gap-0.5 shrink-0">
           <button
             onClick={() => { setAddingStep(a => !a); setExpanded(true) }}
@@ -106,9 +158,12 @@ function TaskItem({ task, subtasks, onComplete, onSetActive, onArchive, onAdd })
                   : <div className="w-4 h-4 rounded-full border-2 border-gray-300 hover:border-emerald-500 transition-colors" />
                 }
               </button>
-              <span className={`text-sm flex-1 ${sub.status === 'done' ? 'line-through text-gray-400' : 'text-gray-700'}`}>
-                {sub.title}
-              </span>
+              <EditableTitle
+                value={sub.title}
+                onSave={(t) => onRename(sub.id, t)}
+                className={`text-sm flex-1 text-left ${sub.status === 'done' ? 'line-through text-gray-400' : 'text-gray-700'}`}
+                inputClassName="text-sm flex-1 text-gray-700 border border-indigo-300 rounded-md px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
               <button onClick={() => onArchive(sub.id)} className="text-gray-300 hover:text-rose-400 transition-colors">
                 <X size={13} />
               </button>
@@ -227,7 +282,7 @@ function NowMode({ activeTask, subtasks, onComplete, onAddStep, onBack }) {
 }
 
 export default function TasksPage() {
-  const { loading, add, complete, setActive, archive, activeTask, rootTasks, subtasksOf } = useTasks()
+  const { loading, add, complete, setActive, archive, rename, activeTask, rootTasks, subtasksOf } = useTasks()
   const [mode, setMode] = useState('list')
 
   if (loading) {
@@ -292,6 +347,7 @@ export default function TasksPage() {
                 onSetActive={handleSetActive}
                 onArchive={archive}
                 onAdd={add}
+                onRename={rename}
               />
             ))
           )}
