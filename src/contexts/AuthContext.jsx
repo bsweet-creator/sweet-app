@@ -31,4 +31,7 @@ export function AuthProvider({ children }) {
   )
 }
 
+// useAuth is a hook (not a component); co-locating it with the provider is
+// intentional. The rule only affects Fast Refresh, so disabling it is safe here.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext)
