@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { CheckSquare, DollarSign } from 'lucide-react'
+import { CheckSquare, DollarSign, Pill } from 'lucide-react'
 
 export default function BottomNav() {
   return (
@@ -26,6 +26,17 @@ export default function BottomNav() {
         >
           <DollarSign size={22} />
           Spend
+        </NavLink>
+        <NavLink
+          to="/meds"
+          className={({ isActive }) =>
+            `flex-1 flex flex-col items-center py-3 gap-1 text-xs font-medium transition-colors ${
+              isActive ? 'text-indigo-600' : 'text-gray-400'
+            }`
+          }
+        >
+          <Pill size={22} />
+          Meds
         </NavLink>
       </div>
     </nav>

@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import AuthPage from './components/AuthPage'
 import TasksPage from './components/TasksPage'
 import AllowancePage from './components/AllowancePage'
+import MedicinePage from './components/MedicinePage'
 import BottomNav from './components/BottomNav'
 
 function AppContent() {
@@ -24,6 +25,7 @@ function AppContent() {
         <Route path="/" element={<Navigate to="/tasks" replace />} />
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/spend" element={<AllowancePage />} />
+        <Route path="/meds" element={<MedicinePage />} />
         <Route path="*" element={<Navigate to="/tasks" replace />} />
       </Routes>
       <BottomNav />
